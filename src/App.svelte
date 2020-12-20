@@ -1,5 +1,5 @@
-<script>
-	let name = 'world';
+<script lang="ts">
+	import Pexeso from './pexeso/Game.svelte';
 </script>
 
-<h1>Hello {name}!</h1>
+<Pexeso />

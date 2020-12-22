@@ -16,13 +16,25 @@ export class GameEngine {
   private secondRevealedCard:Card = null;
   private evaluationInProgress = false;
   private cardSize = 100;
-  public readonly tableSize = 4;
+  private _tableSize = 4;
+  private firstTouch: Date;
   public cardBackgroundColor = '#fe8a71';
 
+  
+  public set tableSize(size: number) {
+    this._tableSize = size;
+    this.restartGame();
+  }
+
+  
+  public get tableSize(): number {
+    return this._tableSize;
+  }
+  
   constructor() {
+    revealsCounter.set(0);
     this.generateCardBackgroundColor();
     this.generateCardPack();
-    revealsCounter.set(0);
     this.startGame()
   }
 
@@ -73,6 +85,9 @@ export class GameEngine {
   }
 
   public cardRevealed(card: Card) {
+    if (!this.firstTouch) {
+      this.firstTouch = new Date();
+    }
     if (!this.evaluationInProgress) { 
       revealsCounter.update((n) => n + 1);
       if (this.firstRevealedCard) {

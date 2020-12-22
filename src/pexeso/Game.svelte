@@ -1,16 +1,17 @@
 <script lang="typescript">
   import Card from "./Card.svelte";
   import { GameEngine } from "./game";
-  import { cardPack, revealsCounter } from "./stores.js";
+  import { cardPack, revealsCounter, measuredTime } from "./stores.js";
   import { fly } from 'svelte/transition';
   import { onMount } from 'svelte';
 
   let game = new GameEngine();
-
   let buttonsVisible = false;
+  let time:any;
 
   onMount(() => {
     buttonsVisible = true;
+    measuredTime.subscribe(firstTouch => time = firstTouch | 0);
   });
 
   function revealCard(card) {
@@ -51,7 +52,7 @@
     <div transition:fly="{{ x: 100, duration: 2000 }}" style="flex: 1">
       <h1 style="text-align: center;">Score</h1>
       <p style="text-align: center; font-size: 25px">Počet tahů: {$revealsCounter}</p>
-      <p style="text-align: center; font-size: 25px">Čas:: {$revealsCounter}</p>
+      <p style="text-align: center; font-size: 25px">Čas: {time / 1000}</p>
       <div style="margin-top: 30px;">
         <button style="display: block; margin: auto; padding: 10px; background: white; margin-bottom: 10px; font-size: 18px" on:click={() => changeTableSize(4)}>4x4</button>
         <button style="display: block; margin: auto; padding: 10px; background: white; margin-bottom: 10px; font-size: 18px" on:click={() => changeTableSize(6)}>6x6</button>

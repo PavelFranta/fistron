@@ -1,4 +1,4 @@
-import { cardPack, revealsCounter } from './stores.js'
+import { cardPack, revealsCounter, measuredTime } from './stores.js'
 
 export interface Card {
   size:number;
@@ -9,24 +9,22 @@ export interface Card {
   victoryCard: boolean;
   backgroundColor: string
 }
-
 export class GameEngine {
   private cards: Card[] = [];
   private firstRevealedCard:Card = null;
   private secondRevealedCard:Card = null;
   private evaluationInProgress = false;
-  private cardSize = 100;
-  private _tableSize = 4;
-  private firstTouch: Date;
-  public cardBackgroundColor = '#fe8a71';
-
+  private cardSize:number = 100;
+  private _tableSize:number = 4;
+  private intervalToMeasureTime;
+  public firstTouch: Date;
+  public cardBackgroundColor:string = '#fe8a71';
   
   public set tableSize(size: number) {
     this._tableSize = size;
     this.restartGame();
   }
 
-  
   public get tableSize(): number {
     return this._tableSize;
   }
@@ -67,6 +65,7 @@ export class GameEngine {
       if (this.victoryCheck()) {
         this.cards[this.findCardRealIndex(this.secondRevealedCard.index)].victoryCard = true;
         this.cards[this.findCardRealIndex(this.secondRevealedCard.index)].symbol = ':)';
+        this.stopMeasureTime();
         return;
       }
       this.resetCardsAfterEvaluation();
@@ -84,9 +83,20 @@ export class GameEngine {
     cardPack.set(this.cards);
   }
 
+  private startMeasureTime() {
+    this.intervalToMeasureTime = setInterval(() => { 
+      measuredTime.set(Math.abs(((new Date() as any) - (new Date(this.firstTouch) as any)) / 1).toString());
+     }, 10);
+  }
+
+  private stopMeasureTime() {
+    clearInterval(this.intervalToMeasureTime);
+  }
+
   public cardRevealed(card: Card) {
     if (!this.firstTouch) {
       this.firstTouch = new Date();
+      this.startMeasureTime();
     }
     if (!this.evaluationInProgress) { 
       revealsCounter.update((n) => n + 1);
@@ -118,6 +128,9 @@ export class GameEngine {
 
   public restartGame() {
     revealsCounter.set(0);
+    measuredTime.set(null);
+    this.firstTouch = null;
+    this.stopMeasureTime();
     this.resetCardsAfterEvaluation();
     this.generateCardBackgroundColor()
     this.generateCardPack();
